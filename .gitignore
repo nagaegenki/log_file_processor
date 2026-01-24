@@ -1,0 +1,11 @@
+# Python
+__pycache__/
+*.pyc
+
+# Packaging / build artifacts
+*.egg-info/
+dist/
+build/
+
+# Log
+logs/
