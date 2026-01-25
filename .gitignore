@@ -9,3 +9,6 @@ build/
 
 # Log
 logs/
+
+# Coverage
+.coverage
