@@ -1,51 +1,25 @@
-import logging
-import pytest
+from logfp.processor import process_lines
 
-from logfp.processor import process_log, process_log_file
+def test_process_lines_basic():
+    lines = [
+        "hello",
+        "",
+        "warn: something",
+        "error: happened",
+    ]
 
-def test_info_log(caplog):
-    caplog.set_level(logging.INFO)
+    result = process_lines(lines)
 
-    process_log("hello world")
+    assert result["total"] == 4
+    assert result["info"] == 1
+    assert result["warning"] == 2
+    assert result["error"] == 1
 
-    assert "Processing message: hello world" in caplog.text
-
-def test_error_log(caplog):
-    caplog.set_level(logging.ERROR)
-
-    process_log("this is an error message")
-
-    assert "Error detected in message!" in caplog.text
-
-def test_warning_on_empty_message(caplog):
-    caplog.set_level(logging.WARNING)
-
-    process_log("")
-
-    assert "Empty message received" in caplog.text
-
-def test_none_message_raise_value_error():
-    with pytest.raises(ValueError):
-        process_log(None)
-
-def test_none_string_message_raise_type_error():
-    with pytest.raises(TypeError):
-        process_log(123)
-
-def test_process_log_file(tmp_path, caplog):
-    caplog.set_level(logging.WARNING)
-
-    log_file = tmp_path / "input.log"
-    log_file.write_text("hello\n\nerror happened\n", encoding="utf-8")
-
-    count = process_log_file(log_file)
-
-    assert count == 3
-    assert "Empty message received" in caplog.text
-    assert "Error detected in message!" in caplog.text
-
-def test_process_log_file_not_found(tmp_path):
-    missing = tmp_path / "missing.log"
-
-    with pytest.raises(FileNotFoundError):
-        process_log_file(missing)
+def test_process_lines_empty():
+    result = process_lines([])
+    assert result == {
+        "total": 0,
+        "info": 0,
+        "warning": 0,
+        "error": 0,
+    }

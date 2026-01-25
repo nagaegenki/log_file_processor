@@ -1,35 +1,43 @@
-from pathlib import Path
-
 import logging
+from pathlib import Path
 
 logger = logging.getLogger(__name__)
 
-def process_log(message: str) -> None:
-    if message is None:
-        raise ValueError("message must not be None")
-
-    if not isinstance(message, str):
-        raise TypeError("message must be a string")
-
-    if message == "":
+def classify_message(line: str) -> str:
+    if not line.strip():
         logger.warning("Empty message received")
-        return
+        return "warning"
 
-    logger.info(f"Processing message: {message}")
-
-    if "error" in message.lower():
+    lower = line.lower()
+    if "error" in lower:
         logger.error("Error detected in message!")
+        return "error"
+    if "warn" in lower:
+        logger.warning("Warning detected in message")
+        return "warning"
 
-def process_log_file(path: Path) -> int:
-    if not path.exists():
-        raise FileNotFoundError(path)
+    logger.info("Info message processed")
+    return "info"
 
-    count = 0
+def process_lines(lines: list[str]) -> dict[str, int]:
+    result = {
+        "total": 0,
+        "info": 0,
+        "warning": 0,
+        "error": 0,
+    }
+
+    for line in lines:
+        level = classify_message(line)
+        result["total"] += 1
+        result[level] += 1
+
+    return result
+
+def process_log_file(path: Path) -> dict[str, int]:
+    logger.info(f"Processing file: {path}")
 
     with path.open(encoding="utf-8") as f:
-        for line in f:
-            line = line.rstrip("\n")
-            process_log(line)
-            count += 1
+        lines = f.readlines()
 
-    return count
+    return process_lines(lines)
