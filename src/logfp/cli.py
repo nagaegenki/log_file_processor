@@ -50,7 +50,7 @@ def main() -> None:
         for key, value in result.items():
             lines.append(f"  {key}: {value}")
         output_text = "\n".join(lines)
-    
+
     if args.output:
         args.output.write_text(output_text, encoding="utf-8")
     else:
